@@ -3,19 +3,28 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"os"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
 func main() {
-	// 第2引数の形式は "user:password@tcp(host:port)/dbname"
-	// db, err := sql.Open("mysql", "root:password@172.18.0.1:3306/test_db")
-	db, err := sql.Open("mysql", "root:password@tcp(db:3306)/test_db")
-	// db, err := sql.Open("mysql", "root:password@/test_db")
+	var (
+		user   = os.Getenv("DB_USERNAME")
+		pass   = os.Getenv("DB_PASSWORD")
+		host   = os.Getenv("DB_HOSTNAME")
+		port   = os.Getenv("DB_PORT")
+		dbname = os.Getenv("DB_DATABASE")
+	)
+
+	// dns user:password@tcp(host:port)/dbname
+	dns := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", user, pass, host, port, dbname)
+	fmt.Println(dns)
+	db, err := sql.Open("mysql", dns)
 	if err != nil {
 		panic(err.Error())
 	}
-	defer db.Close() // 関数がリターンする直前に呼び出される
+	defer db.Close()
 
 	// Open doesn't open a connection. Validate DSN data:
 	err = db.Ping()
@@ -23,7 +32,8 @@ func main() {
 		panic(err.Error()) // proper error handling instead of panic in your app
 	}
 
-	rows, err := db.Query("select * from user;") //
+	// 今回はダミーでuserというテーブルを作成したので
+	rows, err := db.Query("select * from users;")
 	if err != nil {
 		panic(err.Error())
 	}

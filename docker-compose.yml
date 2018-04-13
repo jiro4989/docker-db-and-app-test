@@ -2,7 +2,7 @@ version: '3'
 
 services:
   db:
-    image: mysql:8.0.4
+    image: mysql:5.7
     container_name: test_db
     restart: always
     environment:
@@ -15,7 +15,7 @@ services:
       - 3306
 
   app:
-    image: golang:onbuild
+    build: ./dockerfiles/test_app
     container_name: test_app
     ports:
       - "8080:80"
@@ -23,5 +23,8 @@ services:
     volumes:
       - ./src:/go/src/app
     environment:
-      DEBUG_FLAG: "true"
-      DB_PASSWD: "password"
+      DB_USERNAME: "root"
+      DB_PASSWORD: "password"
+      DB_HOSTNAME: "db"
+      DB_PORT: "3306"
+      DB_DATABASE: "test_db"
